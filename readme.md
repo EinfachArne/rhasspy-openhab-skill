@@ -26,7 +26,7 @@ docker build -t rhasspy-openhabskill .
 3. Run the docker image:
 
 ```Shell
-docker run rhasspy-openhabskill
+docker run -d --name rhasspy-openhabskill rhasspy-openhabskill
 ```
 
 **Optional arguments:**
