@@ -4,6 +4,10 @@ COPY requirements.txt .
 RUN pip install --user -r requirements.txt
 RUN mkdir -p /log
 
+WORKDIR /lang
+
+COPY ./lang .
+
 WORKDIR /src
 
 COPY ./src .

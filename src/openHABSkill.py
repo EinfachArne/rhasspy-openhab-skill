@@ -1,4 +1,4 @@
-import requests
+import gettext
 from openhab import OpenHAB, ItemNotFoundError, LocationNotFoundError
 from rhasspy import Rhasspy
 from rhasspyhermes_app import EndSession, HermesApp
@@ -35,9 +35,18 @@ openhab = OpenHAB(url_openHAB)
 rhasspy = Rhasspy(url_rhasspy, openhab.get_slot_values())
 
 
+# Translation
+def getTranslator(language):
+    lang = gettext.translation(
+        'app', localedir="/lang", languages=[language])
+
+    lang.install()
+
+    return lang.gettext
+
+
 @app.on_intent("OpenHABSwitchOn")
 async def switchOn(intent: NluIntent):
-
     spoken_item = ''
     site_id = ''
 
@@ -47,17 +56,19 @@ async def switchOn(intent: NluIntent):
 
     site_id = intent.site_id
 
+    _ = getTranslator(intent.lang)
+
     try:
         succesful = openhab.switch_item(spoken_item, "ON", site_id)
     except ItemNotFoundError:
-        return EndSession(f"{spoken_item} ist mir leider nicht bekannt")
+        return EndSession(f"{spoken_item} " + _("is unknown to me"))
     except LocationNotFoundError:
-        return EndSession(f"{site_id} ist mir leider nicht bekannt")
+        return EndSession(f"{site_id} " + _("is unknown to me"))
 
     if succesful:
-        return EndSession(f"{spoken_item} ist eingeschaltet")
+        return EndSession(f"{spoken_item} " + _("is turned on"))
     else:
-        return EndSession(f"Ich konnte das Objekt mit dem Namen {spoken_item} leider nicht einschalten")
+        return EndSession(_("The item") + f" {spoken_item} " + _("could not be turned on"))
 
 
 @app.on_intent("OpenHABSwitchOff")
@@ -72,16 +83,18 @@ async def switchOff(intent: NluIntent):
 
     site_id = intent.site_id
 
+    _ = getTranslator(intent.lang)
+
     try:
         succesful = openhab.switch_item(spoken_item, "OFF", site_id)
     except ItemNotFoundError:
-        return EndSession(f"{spoken_item} ist mir leider nicht bekannt")
+        return EndSession(f"{spoken_item} " + _("is unknown to me"))
     except LocationNotFoundError:
-        return EndSession(f"{site_id} ist mir leider nicht bekannt")
+        return EndSession(f"{site_id} " + _("is unknown to me"))
 
     if succesful:
-        return EndSession(f"{spoken_item} ist ausgeschaltet")
+        return EndSession(f"{spoken_item} " + _("is turned off"))
     else:
-        return EndSession(f"Ich konnte das Objekt mit dem Namen {spoken_item} leider nicht ausschalten")
+        return EndSession(_("The item") + f" {spoken_item} " + _("could not be turned off"))
 
 app.run()
